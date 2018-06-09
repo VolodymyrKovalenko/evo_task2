@@ -4,16 +4,19 @@ import argparse
 from server import Server
 from shard import Shard
 from distributedDb import DistributedDataBase
-from dataloss import DataLoss
+from dataSimulator import DataLossSimulator
 
-def main_process():
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", help="number of virtual servers",type=int)
+    parser.add_argument("-n", help="number of virtual servers", type=int)
     parser.add_argument("-r", "--random", action="store_true", help="random mode")
     parser.add_argument("-m", "--mirror", action="store_true", help="mirror mode")
     args = parser.parse_args()
-    n = args.n
+    return args
 
+def main():
+    args = parse_args()
+    n = args.n
     servers_obj_list = [Server(chr(65 + x), n) for x in range(0, n)]
     distributed_db = DistributedDataBase(servers_obj_list)
 
@@ -25,10 +28,9 @@ def main_process():
         elif args.mirror:
             distributed_db.add_mirror_data(shard)
 
-    dataloss = DataLoss(servers_obj_list)
+    dataloss = DataLossSimulator(servers_obj_list)
     print('Killing 2 arbitrary servers results in data loss in {}% cases'\
           .format(dataloss.probability*100))
 
-
 if __name__ == '__main__':
-    main_process()
+    main()
